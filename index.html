@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Animal Buttons</title>
+  </head>
+
+  <body>
+    <form id="search-form">
+      <label for="search-input">Search for gifs!</label>
+      <input type="text" id="user-input" /><br />
+
+      <!-- This button will trigger our AJAX call -->
+      <input id="find-gif" type="submit" value="Gif Search" />
+    </form>
+    <div id="button-div"></div>
+    <div id="gifs-appear-here"></div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+      $(document).ready(function() {
+        var topicArray = [
+          "cats",
+          "dogs",
+          "harry potter",
+          "arrested development",
+          "sailor moon",
+          "muppets",
+          "disney world",
+          "the office"
+        ];
+        var userInput = "";
+
+        function genButtons() {
+          console.log("called fn");
+          for (var i = 0; i < topicArray.length; i++) {
+            console.log("loopy scoopy");
+            var gifButton = $(
+              "<button class='ready-button' data-topic='" +
+                topicArray[i] +
+                "'>" +
+                topicArray[i] +
+                "</button>"
+            );
+            $("#button-div").append(gifButton);
+          }
+        }
+
+        genButtons();
+
+        $("#find-gif").on("click", function(event) {
+          // Preventing the submit button from trying to submit the form
+          // We're optionally using a form so the user may hit Enter to search instead of clicking the button
+          event.preventDefault();
+
+          // Here we grab the text from the input box
+          var searchInput = $("#user-input").val().trim();
+          var searchTerm = searchInput.toLowerCase();
+          console.log(searchTerm);
+          topicArray.push(searchTerm);
+          console.log(topicArray);
+          $("#button-div").empty();
+          genButtons();
+        });
+
+        $(document).on("click", "button", function() {
+          var topic = $(this).attr("data-topic");
+          console.log("this is topic:", topic);
+          var queryURL =
+            "api.giphy.com/v1/gifs/random?&api_key=WtPUrZWjO8g4ZVFP8BHRfOOOpHyOd59Y&tag="+topic+"&limit=10";
+
+          $.ajax({
+            url: queryURL,
+            method: "GET"
+          }).then(function(response) {
+            console.log(response);
+            var results = response.data;
+            for (var i = 0; i < results.length; i++) {
+              var moveImg = results[i].images.fixed_height.url; //animated gif url
+              var stillImg = results[i].images.fixed_height_still.url;
+              var topicDiv = $("<div>");
+              var p = $("<p>Rating: " + results[i].rating + "</p>");
+              var topicImage = $(
+                '<img class="gif" src="' +
+                  stillImg +
+                  '" data-still="' +
+                  stillImg +
+                  '" data-animate="' +
+                  moveImg +
+                  '" data-state="still">'
+              );
+              $(topicDiv).append(topicImage);
+              $(topicDiv).append(p);
+              $("#gifs-appear-here").prepend(topicDiv);
+            }
+          });
+        });
+      
+
+      $(document).on("click", ".gif", function() {
+        console.log($(this).attr("data-state"));
+        var state = $(this).attr("data-state");
+        if (state === "still") {
+          $(this).attr("src", $(this).attr("data-animate"));
+          $(this).attr("data-state", "animate");
+        } else {
+          $(this).attr("src", $(this).attr("data-still"));
+          $(this).attr("data-state", "still");
+        }
+      });
+    });
+    </script>
+  </body>
+</html>
