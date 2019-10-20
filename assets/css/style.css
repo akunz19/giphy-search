@@ -1,0 +1,7 @@
+body{
+    background-image: url("../images/Memphis Pattern 11.png");
+    background-repeat: repeat;
+    background-size: 200px;
+    background-position: absolute;
+    margin: 0 auto;
+}
